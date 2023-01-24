@@ -1,0 +1,23 @@
+{
+  "name": "import_photos_script",
+  "version": "1.0.0",
+  "description": "",
+  "main": "CHATGPT_photos_import.js",
+  "type" : "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "async-await-foreach": "^1.0.4",
+    "asyncforeach": "^1.0.0-beta.13",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "googleapis": "^110.0.0",
+    "googlephotos": "^0.3.5",
+    "nodemon": "^2.0.20",
+    "open": "^8.4.0",
+    "write-json-file": "^5.0.0"
+  }
+}
