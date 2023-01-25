@@ -2,7 +2,7 @@
   "name": "import_photos_script",
   "version": "1.0.0",
   "description": "",
-  "main": "CHATGPT_photos_import.js",
+  "main": "connect_to_google_photo.js",
   "type" : "module",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
