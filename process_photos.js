@@ -1,70 +1,67 @@
 import fs from "fs";
 import path from "path";
+import dotenv from 'dotenv';
+import asyncForEach from 'async-await-foreach';
 import {writeJsonFile} from 'write-json-file';
 
-const currentDir = process.cwd();
+dotenv.config();
+
+const albumsPath = process.env.ALBUMS_PATH;
 let filesToUpload = {};
 
-const excludedYearList = [
-  "2022",
-  "2010",
+const excludedFolderList = [
+  "google-photos-album-importer",
   "2013",
   "2014",
   "2016",
-  "node_modules",
+  "2022",
 ];
 
-fs.readdir(currentDir, (err, files) => {
+fs.readdir(process.env.ALBUMS_PATH, async (err, files) => {
   if (err) {
     console.error("An error occurred:", err);
     return;
   }
 
-  const yearList = files.filter(file => {
-    const filePath = path.join(currentDir, file);
+  const folders = files.filter(file => {
+    if (excludedFolderList.includes(file))
+      return false;
+    const filePath = path.join(albumsPath, file);
     return fs.statSync(filePath).isDirectory();
   });
-
-  yearList.forEach(year => {
-    if (excludedYearList.includes(year))
-      return ;
-    console.log("Year:", year);
-    listYearDirectory(year)
+  await asyncForEach(folders, async year => {
+    console.log("Processing folder :", year);
+    await listYearDirectory(year);
   });
+
+  await writeJsonFile(process.env.PROCESSED_ALBUMS_FILE_NAME, filesToUpload);
+  console.log(`Photos are now ready to import, check this file : ${process.env.PROCESSED_ALBUMS_FILE_NAME}`);
 });
 
 async function listYearDirectory(year) {
-
-  const yearDirectoryPath = path.join(currentDir, year);
-
+  const yearDirectoryPath = path.join(albumsPath, year);
   const files = fs.readdirSync(yearDirectoryPath);
 
-  const photoAlbums = files.filter(file => {
-    const filePath = path.join(yearDirectoryPath, file);
-    return fs.statSync(filePath).isDirectory();
-  });
-
-  photoAlbums.forEach(album => {
-    filesToUpload[album] = [];
-    listFilesAndFolders(path.join(yearDirectoryPath, album), album);
-  });
-
-  const reportFileName = 'photos.json';
-  await writeJsonFile(reportFileName, filesToUpload);
-  console.log(`Photos are now ready to import, check this file : ${reportFileName}`);
+  files
+    .filter(file => fs.statSync(path.join(yearDirectoryPath, file)).isDirectory() )
+    .forEach(album => {
+      const albumDescription = album.replace(/20[0-9]{2}.[0-9]{2}(.[0-9]{2})? /gm,'');
+      const albumPath = path.join(yearDirectoryPath, album);
+      filesToUpload[album] = [];
+      listFilesAndFolders(albumPath, album, albumDescription);
+    });
 }
 
-function listFilesAndFolders(dir, albumName) {
+function listFilesAndFolders(albumPath, albumName, albumDescription) {
   try {
-    const files = fs.readdirSync(dir);
-    const albumDescription = albumName.replace(/20[0-9]{2}.[0-9]{2}(.[0-9]{2})? /gm,'');
+    const files = fs.readdirSync(albumPath);
 
     files.forEach(file => {
-      const filePath = path.join(dir, file);
+      const filePath = path.join(albumPath, file);
       const isDirectory = fs.statSync(filePath).isDirectory();
 
       if (isDirectory) {
-        listFilesAndFolders(filePath, albumName);
+        listFilesAndFolders(filePath, albumName, albumDescription);
       } else {
         filesToUpload[albumName].push({
           fileName: file, 
