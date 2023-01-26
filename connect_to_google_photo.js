@@ -95,8 +95,10 @@ app.get('/photos/upload/album', async function(req, res) {
 
   try {
     for (const {albumName, files} of getNextAlbum(photosData)) {
-      const album = await photos.albums.create(albumName);
-  
+      const album = await createAlbum(albumName);
+      if (album === null)
+        continue;
+
       console.log(`Uploading album "${albumName}" ...`);
   
       await asyncForEach(files, async file => {
@@ -138,10 +140,21 @@ async function uploadingFile(album, fileName, filePath, description, requestDela
     return response;
   }
   catch(err) {
-    log(album.title, err);
+    log(album.title, fileName, err);
+    await writeJsonFile("error_report.json", errorReport);
     console.log(" Failed 😭");
   }
 }
+async function createAlbum(albumName) {
+  try {
+    return await photos.albums.create(albumName);
+  } catch (err) {
+    console.log(`⚠️  "${albumName}" album creation failed.`);
+    log("album-creation", albumName, err);
+    return null;
+  }
+} 
+
 
 app.listen(8000, () => {
   console.log("listening on port 8000");
@@ -164,11 +177,11 @@ function makeItDone(message, cb) {
   console.log(" Done !");
 }
 
-function log(albumName, err) {
+function log(albumName, fileName, err) {
   if (errorReport[albumName] === undefined) {
     errorReport[albumName] = [];
   }
-  errorReport[albumName].push(err);
+  errorReport[albumName].push({fileName, err});
 }
 
 function isEmpty(obj) {
