@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <%- include('../partials/head'); %>
+</head>
+<body class="container">
+
+    <header>
+        <%- include('../partials/header'); %>
+    </header>
+
+    <main>
+        <div class="jumbotron">
+            <h1>List</h1>
+            
+            <p>Here are your albums in google photos.</p>
+
+            <% for(var i = 0; i < albums.length; i++) { %>
+                <li>
+                    <a href="<%=albums[i].productUrl%>"><%=albums[i].title%></a>
+                </li>  
+            <% } %>
+
+        </div>
+    </main>
+
+<footer>
+    <%- include('../partials/footer'); %>
+</footer>
+
+</body>
+</html>

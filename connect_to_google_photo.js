@@ -5,19 +5,24 @@ import express from 'express';
 import open from 'open';
 import asyncForEach from 'async-await-foreach';
 import fs from "fs";
-// import path from "path";
+import path from "path";
 import {writeJsonFile} from 'write-json-file';
+import ejs  from 'ejs';
 
 dotenv.config();
 const app = express();
+app.set('view engine', 'ejs');
+app.set('views', path.join(process.cwd(), '/views'));
+app.use(express.static('public'))
 
 let oauth2Client, photos, photosData, errorReport = {};
 
 makeItDone("Processing albums to import...", () => photosData = JSON.parse(fs.readFileSync(process.env.PROCESSED_ALBUMS_FILE_NAME, 'utf8')));
 
 app.get('/', async function (req, res) {
-  await open("http://localhost:8000/connect");
-  res.send("go conect");
+  // await open("http://localhost:8000/connect");
+  // res.send("go conect");
+  res.render('pages/index');
 })
 
 app.get('/connect', function(req, res) {
@@ -49,11 +54,7 @@ app.get("/google/auth/redirect", async function (req, res) {
 });
 
 app.get('/photos/menu', function (req, res) {
-  res.send(`C'est tout bon tu es connecté!! <br/> Tu peux tester avec les fonctionnalités suivantes : 
-      <ul> 
-        <li><a href="/photos/list" target="_blank">Liste des albums</a> </li> 
-        <li><a href="/photos/upload/album" target="_blank">Uploader un album </a> </li> 
-      </ul>`);
+  res.render('pages/menu');
 });
 
 app.get('/photos/list', async function(req, res) {
@@ -66,22 +67,8 @@ app.get('/photos/list', async function(req, res) {
   }
 
   const response = await photos.albums.list(50);
-  const albums = response.albums;
 
-  const albumView = albums.map((album) => {
-    return `<li>
-              <h2>
-                <a href="${album.productUrl}">${album.title}</a>
-              </h2> 
-            </li>`;
-  });
-
-  let view = "<h1> Albums Photos </h1>";
-  albumView.forEach(album => {
-    view += album;
-  });
-  view = `<ul>${view}<ul>`;
-  res.send(view);
+  return res.render('pages/list', {albums: response.albums});
 });
 
 app.get('/photos/upload/album', async function(req, res) {
@@ -128,7 +115,7 @@ app.get('/photos/upload/album', async function(req, res) {
   }
   
   console.log("Every albums had been processed successfully. Check error report for more details.");
-  res.send("C'est tout bon");
+  res.render('pages/upload');
 });
 async function uploadingFile(album, fileName, filePath, description, requestDelay) {  
   try {

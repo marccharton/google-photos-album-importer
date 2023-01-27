@@ -11,9 +11,11 @@ let filesToUpload = {};
 
 const excludedFolderList = [
   "google-photos-album-importer",
-  "2013",
-  "2014",
-  "2016",
+  "2010",
+  "2011",
+  // "2013",
+  // "2014",
+  // "2016",
   "2022",
 ];
 
