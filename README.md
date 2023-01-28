@@ -3,8 +3,7 @@ Import albums photos to [google photos](https://www.google.com/photos/about/) fr
 
 ## todo
 - [x] feed readme
-- [ ] fix download error report
-- [ ] socketio to display importations
+- [x] fix download error report
 
 ## Environment
       
