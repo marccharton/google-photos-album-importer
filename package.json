@@ -18,7 +18,6 @@
     "googleapis": "^110.0.0",
     "googlephotos": "^0.3.5",
     "nodemon": "^2.0.20",
-    "open": "^8.4.0",
     "write-json-file": "^5.0.0"
   }
 }

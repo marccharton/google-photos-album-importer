@@ -2,12 +2,10 @@ import dotenv from 'dotenv';
 import {google} from 'googleapis';
 import Photos from 'googlephotos';
 import express from 'express';
-import open from 'open';
 import asyncForEach from 'async-await-foreach';
 import fs from "fs";
 import path from "path";
 import {writeJsonFile} from 'write-json-file';
-import ejs  from 'ejs';
 
 dotenv.config();
 const app = express();
@@ -16,7 +14,9 @@ app.set('views', path.join(process.cwd(), '/views'));
 app.use(express.static('public'))
 
 let oauth2Client, photos, photosData, errorReport = {};
+const errorReportPath = "public/error_report.json";
 
+deleteOldReport();
 makeItDone("Processing albums to import...", () => photosData = JSON.parse(fs.readFileSync(process.env.PROCESSED_ALBUMS_FILE_NAME, 'utf8')));
 
 app.get('/', async function (req, res) {
@@ -54,70 +54,75 @@ app.get("/google/auth/redirect", async function (req, res) {
 });
 
 app.get('/photos/menu', function (req, res) {
+  photos = getGooglePhotosWrapper();
+  if (photos === null)
+    return res.redirect('/connect');
+
   res.render('pages/menu');
 });
 
 app.get('/photos/list', async function(req, res) {
-  if (!process.env.ACCESS_TOKEN) {
-    res.redirect('/connect');
-    return;
-  }
-  else {
-    photos = new Photos(process.env.ACCESS_TOKEN);
-  }
-
+  photos = getGooglePhotosWrapper();
+  if (photos === null)
+    return res.redirect('/connect');
+   
   const response = await photos.albums.list(50);
 
   return res.render('pages/list', {albums: response.albums});
 });
 
 app.get('/photos/upload/album', async function(req, res) {
-  if (!process.env.ACCESS_TOKEN) {
-    res.redirect('/connect');
-    return;
-  }
-  else {
-    photos = new Photos(process.env.ACCESS_TOKEN);
-  }
+  photos = getGooglePhotosWrapper();
+  if (photos === null)
+    return res.redirect('/connect');
 
   try {
     for (const {albumName, files} of getNextAlbum(photosData)) {
-      const album = await createAlbum(albumName);
-      if (album === null)
+      if (await uploadAlbum(albumName, files) === null)
         continue;
-
-      console.log(`Uploading album "${albumName}" ...`);
-  
-      await asyncForEach(files, async file => {
-          await uploadingFile( 
-            album,
-            file.fileName,
-            file.filePath,
-            file.description,
-            100000,
-          );
-      }).then(_ => {
-        console.log(`☑️ The album "${albumName}" imported ${errorReport[albumName] !== undefined
-                                                            ? 'with errors (check error report file)'
-                                                            : 'successfully'}`);
-      }).catch(err => {
-        console.log(err);
-      })
     }
   }
   catch (err) {
-    res.status(500).send({ err });
-    return ;
+    return res.status(500).send({ err });
   }
   
-  if (!isEmpty(errorReport)) {
-    await writeJsonFile("error_report.json", errorReport);
-  }
-  
-  console.log("Every albums had been processed successfully. Check error report for more details.");
-  res.render('pages/upload');
+  finalLog();
+
+  return res.render('pages/upload', { existingReport : !isEmpty(errorReport) });
 });
-async function uploadingFile(album, fileName, filePath, description, requestDelay) {  
+async function createAlbum(albumName) {
+  try {
+    return await photos.albums.create(albumName);
+  } catch (err) {
+    console.log(`⚠️  "${albumName}" album creation failed.`);
+    log("album-creation", albumName, err);
+    return null;
+  }
+} 
+async function uploadAlbum(albumName, files) {
+  const album = await createAlbum(albumName);
+  if (album === null)
+    return null;
+
+  console.log(`Uploading files into album "${albumName}" ...`);
+
+  await asyncForEach(files, async file => {
+      await uploadFile( 
+        album,
+        file.fileName,
+        file.filePath,
+        file.description,
+        100000,
+      );
+  }).then(_ => {
+    console.log(`☑️ The album "${albumName}" imported ${errorReport[albumName] !== undefined
+                                                        ? 'with errors (check error report file)'
+                                                        : 'successfully'}`);
+  }).catch(err => {
+    console.log(err);
+  })
+}
+async function uploadFile(album, fileName, filePath, description, requestDelay) {  
   try {
     process.stdout.write(`\--> Uploading file "${fileName}" ...`);
 
@@ -132,21 +137,10 @@ async function uploadingFile(album, fileName, filePath, description, requestDela
     console.log(" Failed 😭");
   }
 }
-async function createAlbum(albumName) {
-  try {
-    return await photos.albums.create(albumName);
-  } catch (err) {
-    console.log(`⚠️  "${albumName}" album creation failed.`);
-    log("album-creation", albumName, err);
-    return null;
-  }
-} 
-
 
 app.listen(8000, () => {
   console.log("listening on port 8000");
 });
-
 
 // ======= UTILS ========
 
@@ -157,20 +151,44 @@ function* getNextAlbum(data) {
     yield {albumName, files};
   }
 }
-
 function makeItDone(message, cb) {
   process.stdout.write(message);
   cb();
   console.log(" Done !");
 }
-
 function log(albumName, fileName, err) {
   if (errorReport[albumName] === undefined) {
     errorReport[albumName] = [];
   }
   errorReport[albumName].push({fileName, err});
 }
-
 function isEmpty(obj) {
   return Object.keys(obj).length === 0;
+}
+function deleteOldReport() {
+  fs.unlink(errorReportPath, (err) => {
+    if (err) {
+      if (err.errno !== -4058)
+        throw err;
+      console.log("No Existing Error Report");
+      return;
+    }
+    console.log('Error Report was deleted');
+  });
+}
+function getGooglePhotosWrapper () {
+  if (!process.env.ACCESS_TOKEN) {
+    return null;
+  }
+  return new Photos(process.env.ACCESS_TOKEN);
+}
+async function finalLog() {
+  if (!isEmpty(errorReport)) {
+    await writeJsonFile(errorReportPath, errorReport);
+    console.log("Some albums had reported some errors.");
+  }
+  else {
+    console.log("Every albums had been processed successfully.");
+  }
+  console.log("Check error report for more details.");
 }

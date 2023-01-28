@@ -14,8 +14,10 @@
             <h1>Upload</h1>
             
             <p>Every albums had been processed successfully. </p> 
-            <p>Check error report for more details.</p>
-            <a href="/error_report.json" download>Download Report</a>
+            <% if(existingReport){ %>
+                <p>Check error report for more details.</p>
+                <a href="/error_report.json" download>Download Report</a>
+            <% } %>            
         </div>
     </main>
 
