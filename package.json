@@ -5,7 +5,8 @@
   "main": "connect_to_google_photo.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node process_photos.js",
+    "import": "node connect_to_google_photo.js"
   },
   "author": "",
   "license": "ISC",
