@@ -4,18 +4,22 @@ Import albums photos to [google photos](https://www.google.com/photos/about/) fr
 ## todo
 - [x] feed readme
 - [x] fix download error report
+- [ ] reload photos
+- [ ] fix use of variable REDIRECT_URL
+- [ ] launch import from client (to see the process growing)
+- [ ] ...
 
 ## Environment
       
 ### CLIENT_ID  
 **Environment variable aiming at** : proving client ID to google server.  
 **Type of value** : Google UID  
-**Source of value** : [Google Cloud](https://console.cloud.google.com/)  
+**Source of value** : [Google Cloud](https://console.cloud.google.com/apis/credentials)  
   
 ### CLIENT_SECRET  
 **Environment variable aiming at** : proving client secret to google server  
 **Type of value** : Google Secret  
-**Source of value** : [Google Cloud](https://console.cloud.google.com/)  
+**Source of value** : [Google Cloud](https://console.cloud.google.com/apis/credentials)  
   
 ### REDIRECT_URL  
 **Environment variable aiming at** : serve a local address used by google OAuth authentication.  
@@ -34,8 +38,10 @@ Import albums photos to [google photos](https://www.google.com/photos/about/) fr
 
 ## Prerequisities
 
+- you to create an authorization to access to google photos api through API Key. [See more](https://console.cloud.google.com/apis/credentials)
 - [nodejs](https://nodejs.org/en/)
-- specific folder archicture for albums
+- specific folder archicture for albums (see below)
+
 
 ### folder architecture
 
@@ -66,3 +72,27 @@ Example :
           </li>
   
 
+## Usage
+
+### Install dependencies
+
+```
+npm install
+```
+
+### Process photos
+
+This script generates a file with all the galleries parsed.  
+
+```
+npm start
+```
+
+
+### Launch the import to google photo
+
+This script launches a web app that let you import your galleries.  
+
+```
+npm run import
+```
