@@ -7,6 +7,7 @@ Import albums photos to [google photos](https://www.google.com/photos/about/) fr
 - [ ] reload photos
 - [ ] fix use of variable REDIRECT_URL
 - [ ] launch import from client (to see the process growing)
+- [ ] move error logs to a folder and use dates for names to ensure unicity
 - [ ] ...
 
 ## Environment
