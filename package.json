@@ -5,8 +5,8 @@
   "main": "connect_to_google_photo.js",
   "type": "module",
   "scripts": {
-    "start": "node process_photos.js",
-    "import": "node connect_to_google_photo.js"
+    "start": "node src/process_photos.js",
+    "import": "node src/connect_to_google_photo.js"
   },
   "author": "",
   "license": "ISC",

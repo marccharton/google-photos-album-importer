@@ -15,13 +15,12 @@ app.use(express.static('public'))
 
 let oauth2Client, photos, photosData, errorReport = {};
 const errorReportPath = "public/error_report.json";
+const albumsFileNamePath = "data/" + process.env.PROCESSED_ALBUMS_FILE_NAME;
 
 deleteOldReport();
-makeItDone("Processing albums to import...", () => photosData = JSON.parse(fs.readFileSync(process.env.PROCESSED_ALBUMS_FILE_NAME, 'utf8')));
+makeItDone("Processing albums to import...", () => photosData = JSON.parse(fs.readFileSync(albumsFileNamePath, 'utf8')));
 
 app.get('/', async function (req, res) {
-  // await open("http://localhost:8000/connect");
-  // res.send("go conect");
   res.render('pages/index');
 })
 
@@ -58,7 +57,7 @@ app.get('/photos/menu', function (req, res) {
   if (photos === null)
     return res.redirect('/connect');
 
-  res.render('pages/menu');
+  res.render('../pages/menu');
 });
 
 app.get('/photos/list', async function(req, res) {
@@ -68,7 +67,7 @@ app.get('/photos/list', async function(req, res) {
    
   const response = await photos.albums.list(50);
 
-  return res.render('pages/list', {albums: response.albums});
+  return res.render('../pages/list', {albums: response.albums});
 });
 
 app.get('/photos/upload/album', async function(req, res) {
@@ -133,13 +132,13 @@ async function uploadFile(album, fileName, filePath, description, requestDelay) 
   }
   catch(err) {
     log(album.title, fileName, err);
-    await writeJsonFile("error_report.json", errorReport);
+    await writeJsonFile(errorReportPath, errorReport);
     console.log(" Failed 😭");
   }
 }
 
 app.listen(8000, () => {
-  console.log("listening on port 8000");
+  console.log("Check the link : http://localhost:8000");
 });
 
 // ======= UTILS ========

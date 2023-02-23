@@ -8,6 +8,7 @@ dotenv.config();
 
 const albumsPath = process.env.ALBUMS_PATH;
 let filesToUpload = {};
+const albumsFileNamePath = "data/" + process.env.PROCESSED_ALBUMS_FILE_NAME;
 
 const excludedFolderList = [
   "google-photos-album-importer",
@@ -36,8 +37,8 @@ fs.readdir(process.env.ALBUMS_PATH, async (err, files) => {
     await listYearDirectory(year);
   });
 
-  await writeJsonFile(process.env.PROCESSED_ALBUMS_FILE_NAME, filesToUpload);
-  console.log(`Photos are now ready to import, check this file : ${process.env.PROCESSED_ALBUMS_FILE_NAME}`);
+  await writeJsonFile(albumsFileNamePath, filesToUpload);
+  console.log(`Photos are now ready to import, check this file : ${albumsFileNamePath}`);
 });
 
 async function listYearDirectory(year) {

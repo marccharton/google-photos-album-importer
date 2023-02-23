@@ -42,6 +42,7 @@ Import albums photos to [google photos](https://www.google.com/photos/about/) fr
 - you to create an authorization to access to google photos api through API Key. [See more](https://console.cloud.google.com/apis/credentials)
 - [nodejs](https://nodejs.org/en/)
 - specific folder archicture for albums (see below)
+- take care of bad character encoding, if a symbol is replacing a character it won't be possible to import the file.
 
 
 ### folder architecture
