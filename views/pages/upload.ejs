@@ -1,29 +1,11 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <%- include('../partials/head'); %>
-</head>
-<body class="container">
+<%- include('../partials/head'); %>
 
-    <header>
-        <%- include('../partials/header'); %>
-    </header>
+<h1>Upload</h1>
 
-    <main>
-        <div class="jumbotron">
-            <h1>Upload</h1>
-            
-            <p>Every albums had been processed successfully. </p> 
-            <% if(existingReport){ %>
-                <p>Check error report for more details.</p>
-                <a href="/error_report.json" download>Download Report</a>
-            <% } %>            
-        </div>
-    </main>
+<p>Every albums had been processed successfully. </p> 
+<% if(existingReport){ %>
+    <p>Check error report for more details.</p>
+    <a href="/error_report.json" download>Download Report</a>
+<% } %>
 
-<footer>
-    <%- include('../partials/footer'); %>
-</footer>
-
-</body>
-</html>
+<%- include('../partials/footer'); %>

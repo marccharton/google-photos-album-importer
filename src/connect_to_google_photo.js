@@ -57,7 +57,7 @@ app.get('/photos/menu', function (req, res) {
   if (photos === null)
     return res.redirect('/connect');
 
-  res.render('../pages/menu');
+  res.render('pages/menu');
 });
 
 app.get('/photos/list', async function(req, res) {
@@ -67,7 +67,7 @@ app.get('/photos/list', async function(req, res) {
    
   const response = await photos.albums.list(50);
 
-  return res.render('../pages/list', {albums: response.albums});
+  return res.render('pages/list', {albums: response.albums});
 });
 
 app.get('/photos/upload/album', async function(req, res) {
